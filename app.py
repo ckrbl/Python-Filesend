@@ -37,19 +37,22 @@ def save_file_to_disk(wkz_file):
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
-    if 'POST' == request.method:
-        # check if the post request has the file part
+    def handle_post():
+        # If request did not contain files, do nothing
         if 'file' not in request.files:
-            return redirect(request.url)
+            return
         wkz_files = request.files.getlist('file')
         for wkz_file in wkz_files:
-            # if user does not select file, browser also
-            # submit a empty part without filename
+            # If file is None, skip it
             if not wkz_file:
                 continue
-            if not save_file_to_disk(wkz_file):
-                return redirect(request.url)
 
+            # If file sent with no path.. quit the whole request
+            if not save_file_to_disk(wkz_file):
+                return
+
+    if 'POST' == request.method:
+        handle_post()
         return redirect(request.url)
 
     return MAIN_PAGE
