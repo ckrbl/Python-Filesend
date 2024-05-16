@@ -12,7 +12,7 @@ Path(UPLOAD_FOLDER).mkdir(parents=True, exist_ok=True)
 
 app = Flask(__name__)
 
-PAGE_HTML='''<!doctype html>
+MAIN_PAGE = '''<!doctype html>
 <head></head>
 <body><center>
 <title>Upload new File</title>
@@ -24,30 +24,36 @@ PAGE_HTML='''<!doctype html>
 </center></body>
 '''
 
-def main_page():
-    return PAGE_HTML
+
+def save_file_to_disk(wkz_file):
+    if not wkz_file.filename:
+        return False
+
+    sanitized_filename = secure_filename(wkz_file.filename)
+    wkz_file.save(join(UPLOAD_FOLDER, sanitized_filename))
+    wkz_file.close()
+    return True
+
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if 'POST' == request.method:
         # check if the post request has the file part
         if 'file' not in request.files:
-            flash('No file part')
             return redirect(request.url)
-        usr_files = request.files.getlist('file')
-        for one_file in usr_files:
+        wkz_files = request.files.getlist('file')
+        for wkz_file in wkz_files:
             # if user does not select file, browser also
             # submit a empty part without filename
-            if not one_file:
+            if not wkz_file:
                 continue
-            if one_file.filename == '':
-                flash('No selected file')
+            if not save_file_to_disk(wkz_file):
                 return redirect(request.url)
-            
-            filename = secure_filename(one_file.filename)
-            one_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            one_file.close()
-    return main_page()
+
+        return redirect(request.url)
+
+    return MAIN_PAGE
+
 
 if __name__ == '__main__':
     run_simple('0.0.0.0', 8000, app)
