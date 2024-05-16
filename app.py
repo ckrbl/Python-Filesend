@@ -5,11 +5,12 @@ from flask import Flask, request, redirect, url_for, flash
 from werkzeug.utils import secure_filename
 from werkzeug import run_simple
 from os.path import dirname, join
- 
+from pathlib import Path
+
 UPLOAD_FOLDER = join(dirname(__file__), 'UPLOADS')
- 
+Path(UPLOAD_FOLDER).mkdir(parents=True, exist_ok=True)
+
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 PAGE_HTML='''<!doctype html>
 <head></head>
