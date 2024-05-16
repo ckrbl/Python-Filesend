@@ -3,30 +3,28 @@
 import os
 from flask import Flask, request, redirect, url_for, flash
 from werkzeug.utils import secure_filename
+from werkzeug import run_simple
 from os.path import dirname, join
  
 UPLOAD_FOLDER = join(dirname(__file__), 'UPLOADS')
-# ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
  
 app = Flask(__name__)
-app.secret_key = 'test?!'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-def allowed_file(filename):
-    return True
-    #return '.' in filename and \
-    #       filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
- 
-def show_page():
-    return '''
-        <!doctype html>
-        <title>Upload new File</title>
-        <h1>Upload new File</h1>
-        <form method=post enctype=multipart/form-data>
-        <p><input type=file name=file multiple>
-            <input type=submit value=Upload>
-        </form>
-        '''
+PAGE_HTML='''<!doctype html>
+<head></head>
+<body><center>
+<title>Upload new File</title>
+<h1>Upload new File</h1>
+<form method=post enctype=multipart/form-data>
+<p><input type=file name=file multiple>
+    <input type=submit value=Upload>
+</form>
+</center></body>
+'''
+
+def main_page():
+    return PAGE_HTML
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
@@ -47,4 +45,8 @@ def upload_file():
             
             filename = secure_filename(one_file.filename)
             one_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    return show_page()
+            one_file.close()
+    return main_page()
+
+if __name__ == '__main__':
+    run_simple('0.0.0.0', 8000, app)
